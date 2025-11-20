@@ -1,0 +1,41 @@
+File Name,Phase,Dependencies,Execution Order,Description
+tech_stack.md,1,cosmic_defenders_prd.md,1,Technology stack recommendations with rationale for frontend/backend/database/cloud/APIs/authentication. Reference before any technical decisions.
+scope.md,1,cosmic_defenders_prd.md,2,Project objectives/deliverables/constraints/assumptions/dependencies/timelines. Defines boundaries of what will/won't be built.
+features.md,1,cosmic_defenders_prd.md,3,Complete feature list with user stories and acceptance criteria organized by priority (Primary/Secondary/Optional). Use for development tasks.
+api_overview.md,1,"cosmic_defenders_prd.md,tech_stack.md",4,API endpoint documentation with request/response examples and integration notes. Reference when building backend or integrating with Ooredoo.
+database_schema.md,1,"cosmic_defenders_prd.md,tech_stack.md,features.md",5,PostgreSQL database schema with tables/relationships/indexes/sample queries. Use when setting up database.
+ux_ui_guidelines.md,1,"cosmic_defenders_prd.md,features.md",6,Navigation flows/wireframes/UI components/design specifications. Reference when building user interface.
+execution_guide.md,1,"All .md files",7,Phase-by-phase Cursor instructions with explicit file cross-references. Master guide for development execution.
+cursor_project_map.csv,1,All .md files,8,This file - dependency map and execution order for entire project.
+,,,,,
+Gambo.ai Account Setup,1,"tech_stack.md,execution_guide.md (Task 1.1)",1,Create Gambo.ai Professional account ($199/month) and verify email. Prerequisites for all development.
+Project Initialization,1,"tech_stack.md,execution_guide.md (Task 1.1)",2,Create Gambo.ai project with mobile portrait configuration. Use AI prompts from execution guide.
+Art Asset Brief,1,"ux_ui_guidelines.md,features.md,execution_guide.md (Task 1.2)",3,Send design brief to contractors for ship skins and enemy sprites. Budget: $8K-12K.
+Sound Design Brief,1,"ux_ui_guidelines.md,execution_guide.md (Task 1.2)",4,Send audio brief to contractors for music/SFX/voice. Budget: $3K-5K.
+API Documentation Review,1,"api_overview.md,execution_guide.md (Task 1.3)",5,Validate Ooredoo API endpoints and obtain test credentials. Contact technical team.
+Database Schema Creation,1,"database_schema.md,execution_guide.md (Task 1.4)",6,Execute PostgreSQL creation scripts and verify connection. Test with sample data.
+,,,,,
+Core Gameplay Development,2,"features.md (Section 1),execution_guide.md (Task 2.1)",1,Implement tap-to-shoot/enemy formation/scoring using Gambo.ai AI prompts. Week 2 focus.
+Visual Asset Integration,2,"ux_ui_guidelines.md,execution_guide.md (Task 2.2)",2,Import ship/enemy sprites and configure particle effects in Gambo.ai. Requires assets from Phase 1.
+Power-Up System,2,"features.md (Section 2),api_overview.md (Section 3),execution_guide.md (Task 2.3)",3,Implement 6 power-up types with token management and API integration. Week 3 focus.
+Rank Progression,2,"features.md (Section 3.1),database_schema.md,execution_guide.md (Task 2.4)",4,Build rank calculation logic and unlock system. Week 3 focus.
+Daily Missions,2,"features.md (Section 3.2),api_overview.md (Section 5),execution_guide.md (Task 2.4)",5,Create mission generation/tracking system with midnight reset. Week 3 focus.
+Leaderboard System,2,"features.md (Section 4.1),api_overview.md (Section 6),execution_guide.md (Task 2.5)",6,Build leaderboard rankings with Redis caching and real-time updates. Week 4 focus.
+Red Club Integration,2,"api_overview.md (Section 4),execution_guide.md (Task 2.6)",7,Implement points conversion with multipliers and transaction logging. Week 4 focus.
+,,,,,
+Device Compatibility Testing,3,"tech_stack.md,features.md,execution_guide.md (Task 3.1)",1,Test on 15+ devices (iOS/Android) and validate performance targets. Week 5 focus.
+Functional Testing,3,"features.md (All acceptance criteria),execution_guide.md (Task 3.2)",2,Execute 100+ test cases covering all features. Target >95% pass rate. Week 5 focus.
+Beta Launch,3,"scope.md,execution_guide.md (Task 3.3)",3,Deploy to 500 Ooredoo staff testers via TestFlight/Google Play Internal. Week 6 focus.
+Analytics Dashboard,3,"tech_stack.md,execution_guide.md (Task 3.3)",4,Configure Gambo.ai/Mixpanel/Google Analytics tracking. Monitor beta metrics. Week 6 focus.
+Bug Fixing & Balance,3,"execution_guide.md (Task 3.4)",5,Triage bugs (P0/P1/P2/P3) and adjust difficulty based on beta data. Ongoing Week 6.
+,,,,,
+Production Setup,4,"tech_stack.md,api_overview.md,execution_guide.md (Task 4.1)",1,Configure production database/Redis/CDN and deploy APIs. Week 7 focus.
+App Store Submission,4,"scope.md,ux_ui_guidelines.md,execution_guide.md (Task 4.2)",2,Prepare screenshots/videos/descriptions and submit iOS/Android updates. Week 7-8 focus.
+Marketing Campaign,4,"scope.md,execution_guide.md (Task 4.3)",3,Execute pre-launch teasers and launch day social media blitz. Week 8-9 focus.
+Customer Support Docs,4,"features.md,execution_guide.md (Task 4.3)",4,Create FAQ and troubleshooting guide for support team. Week 8 focus.
+Launch Day Monitoring,4,"execution_guide.md (Task 4.4)",5,Real-time tracking of metrics/performance/social sentiment on launch day. Week 9 Day 1.
+,,,,,
+Weekly Operations,5,"All .md files,execution_guide.md (Task 5.1)",1,Monitor DAU/retention/crashes daily. Review metrics weekly. Ongoing maintenance.
+Content Updates,5,"features.md (Optional),execution_guide.md (Task 5.2)",2,Monthly new ship skins. Quarterly seasonal events. Deploy via Gambo.ai OTA.
+Performance Optimization,5,"tech_stack.md,execution_guide.md (Task 5.3)",3,Quarterly review of frame rate/load time/API speed. Optimize as needed.
+Feature Roadmap,5,"features.md,execution_guide.md (Task 5.4)",4,Plan Year 2 features (friends/tournaments/new modes) based on Year 1 data.

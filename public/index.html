@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ooredoo Network Defenders</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- Loading Screen -->
+        <div id="loading-screen"
+            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; color: #fff; display: flex; justify-content: center; align-items: center; z-index: 100;">
+            <h1>LOADING...</h1>
+        </div>
+
+        <!-- UI Overlay for Gameplay (Score/Lives/Timer) - Hidden during intro -->
+        <div id="ui-layer" style="display: none;">
+            <div id="score-container">Score: <span id="score">0</span></div>
+            <div id="timer-container">Time: <span id="timer">45</span>s</div>
+            <div id="lives-container">Lives: <span id="lives">3</span></div>
+        </div>
+
+        <!-- Skip Button for Intro -->
+        <div id="skipButton" class="skip-button" style="display: none;">TAP TO SKIP</div>
+
+        <!-- Game Over Screen (Overlay) -->
+        <div id="game-over-screen" class="screen hidden">
+            <h1>CONNECTION LOST</h1>
+            <p id="reward-message" style="display: none; margin-bottom: 20px; line-height: 1.5;"></p>
+            <p>Final Score: <span id="final-score">0</span></p>
+            <button id="restart-btn">RECONNECT</button>
+        </div>
+    </div>
+    <script>console.log("Index.html inline script running");</script>
+    <script type="module" src="js/game.js?v=2"></script>
+</body>
+
+</html>
