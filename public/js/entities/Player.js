@@ -7,9 +7,14 @@ export class Player {
         this.y = canvas.height - this.height - 20;
         this.speed = 300; // pixels per second
         this.color = '#E30613'; // Ooredoo Red
-        this.isShooting = false;
-        this.lastShotTime = 0;
-        this.shootDelay = 300; // ms
+
+        // Auto-shooting properties
+        this.autoShootTimer = 0;
+        this.autoShootDelay = 250; // ms between shots (4 shots per second)
+
+        // Smooth movement properties
+        this.targetX = this.x;
+        this.smoothSpeed = 8; // Lerp factor (higher = faster response)
 
         this.image = new Image();
         // [CHANGED] Use processed image if available (for transparency)
@@ -29,22 +34,40 @@ export class Player {
     }
 
     update(deltaTime, input) {
-        // Movement
+        // Keyboard Movement
         if (input.left) {
-            this.x -= this.speed * (deltaTime / 1000);
+            this.targetX -= this.speed * (deltaTime / 1000);
         }
         if (input.right) {
-            this.x += this.speed * (deltaTime / 1000);
+            this.targetX += this.speed * (deltaTime / 1000);
         }
 
-        // Touch/Mouse follow (simplified)
+        // Touch/Mouse follow (smooth interpolation)
         if (input.x !== null) {
-            this.x = input.x - this.width / 2;
+            this.targetX = input.x - this.width / 2;
         }
+
+        // Smooth movement using lerp
+        const lerpFactor = Math.min(1, this.smoothSpeed * (deltaTime / 1000));
+        this.x += (this.targetX - this.x) * lerpFactor;
 
         // Boundaries
         if (this.x < 0) this.x = 0;
         if (this.x + this.width > this.canvas.width) this.x = this.canvas.width - this.width;
+        if (this.targetX < 0) this.targetX = 0;
+        if (this.targetX + this.width > this.canvas.width) this.targetX = this.canvas.width - this.width;
+
+        // Auto-shooting timer
+        this.autoShootTimer += deltaTime;
+    }
+
+    // Check if ready to auto-shoot
+    shouldAutoShoot() {
+        if (this.autoShootTimer >= this.autoShootDelay) {
+            this.autoShootTimer = 0;
+            return true;
+        }
+        return false;
     }
 
     draw(ctx) {

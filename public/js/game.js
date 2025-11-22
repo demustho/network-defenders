@@ -1,60 +1,73 @@
 import { Player } from './entities/Player.js';
 import { EnemyFormation } from './entities/EnemyFormation.js';
 import { Projectile } from './entities/Projectile.js';
-import { AudioManager } from './AudioManager.js';
+import { Boss } from './entities/Boss.js';
 import { ENEMY_TYPES } from './entities/Enemy.js';
+import { AudioManager } from './AudioManager.js';
+
+import { PreGameScreen } from './screens/PreGameScreen.js';
+
 import { PowerUpManager } from './systems/PowerUpManager.js';
 import { ProgressionManager } from './systems/ProgressionManager.js';
-import { PreGameScreen } from './screens/PreGameScreen.js';
 import { RedClubManager } from './systems/RedClubManager.js';
 import { MissionManager } from './systems/MissionManager.js';
-import { HapticFeedback } from './utils/HapticFeedback.js';
 import { ParticleSystem } from './utils/ParticleSystem.js';
+import { HapticFeedback } from './utils/HapticFeedback.js';
 import { SpriteProcessor } from './utils/SpriteProcessor.js';
 
-// ============================================
-// GAME STATE MANAGER
+console.log("game.js module loaded successfully!");
+
 // ============================================
 
 class GameStateManager {
     constructor(canvas) {
+        console.log("GameStateManager constructor called with canvas:", canvas);
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
+        console.log("1. Canvas context created");
         this.state = 'intro'; // intro, fiber_dive, countdown, pregame, gameplay, results
         this.hasSeenIntro = localStorage.getItem('hasSeenIntro') === 'true';
+        console.log("2. State initialized");
 
         // Managers
+        console.log("3. Creating managers...");
         this.audioManager = new AudioManager();
+        console.log("3a. AudioManager created");
         this.powerUpManager = new PowerUpManager();
+        console.log("3b. PowerUpManager created");
         this.progressionManager = new ProgressionManager();
+        console.log("3c. ProgressionManager created");
         this.redClubManager = new RedClubManager();
+        console.log("3d. RedClubManager created");
         this.missionManager = new MissionManager();
+        console.log("3e. MissionManager created");
         this.hapticFeedback = new HapticFeedback();
+        console.log("3f. HapticFeedback created");
         this.particleSystem = new ParticleSystem();
+        console.log("3g. ParticleSystem created");
 
         // Resize canvas to viewport
+        console.log("4. Resizing canvas...");
         this.resizeCanvas();
+        console.log("4a. Canvas resized");
         window.addEventListener('resize', () => this.resizeCanvas());
 
         // Disable image smoothing for pixel art
         this.ctx.imageSmoothingEnabled = false;
+        console.log("5. Image smoothing disabled");
 
-        // Initialize states
-        this.introScreen = new IntroScreen(this.ctx, this.canvas, this.audioManager);
-        this.fiberDiveAnimation = new FiberDiveAnimation(this.ctx, this.canvas, this.audioManager);
-        this.countdownScreen = new CountdownScreen(this.ctx, this.canvas, this.audioManager);
+        // Initialize states (lazy initialization to avoid class definition order issues)
+        console.log("6. Initializing screen instances...");
+        this.introScreen = null; // new IntroScreen(this.ctx, this.canvas, this.audioManager);
+        this.fiberDiveAnimation = null; // new FiberDiveAnimation(this.ctx, this.canvas, this.audioManager);
+        this.countdownScreen = null; // new CountdownScreen(this.ctx, this.canvas, this.audioManager);
+        console.log("6a. Screen instances set to null");
         this.preGameScreen = new PreGameScreen(this.ctx, this.canvas, this.powerUpManager, this.progressionManager);
-        this.gameplay = new Gameplay(
-            this.ctx,
-            this.canvas,
-            this.audioManager,
-            this,
-            this.powerUpManager,
-            this.progressionManager,
-            this.hapticFeedback,
-            this.particleSystem
-        );
-        this.resultsScreen = new ResultsScreen(this.ctx, this.canvas, this.progressionManager);
+        console.log("6b. PreGameScreen created");
+        this.gameplay = null; // Lazy init - class defined later in file
+        console.log("6c. Gameplay set to null");
+        this.resultsScreen = null; // Lazy init - class defined later in file
+        console.log("6d. ResultsScreen set to null");
 
         // Skip functionality
         this.skipButton = document.getElementById('skipButton');
@@ -89,38 +102,50 @@ class GameStateManager {
 
         // Start game
         this.preloadAssets().then(() => {
+            console.log("Assets loaded, starting game...");
+            this.start();
+        }).catch(error => {
+            console.error("Error loading assets:", error);
+            // Start anyway to allow gameplay
             this.start();
         });
     }
 
     async preloadAssets() {
-        console.log("Preloading and processing assets...");
-        const types = Object.keys(ENEMY_TYPES);
+        console.log("Starting asset preload...");
 
-        const promises = types.map(async (key) => {
-            const type = ENEMY_TYPES[key];
-            if (type.imageSrc) {
-                try {
-                    const processed = await SpriteProcessor.removeBackground(type.imageSrc);
-                    type.processedImage = processed;
-                    console.log(`Processed ${type.name}`);
-                } catch (e) {
-                    console.error(`Failed to process ${type.name}:`, e);
-                }
-            }
-        });
-
-        // Also process player ship
         try {
-            const playerImg = await SpriteProcessor.removeBackground('assets/sprites/player/ship_idle_01.png');
-            Player.processedImage = playerImg;
-            console.log("Processed Player Ship sprite");
-        } catch (e) {
-            console.error("Failed to process player ship:", e);
-        }
+            const types = Object.keys(ENEMY_TYPES);
+            console.log("Enemy types to process:", types);
 
-        await Promise.all(promises);
-        console.log("Assets preloaded.");
+            const promises = types.map(async (key) => {
+                const type = ENEMY_TYPES[key];
+                if (type.imageSrc) {
+                    try {
+                        const processed = await SpriteProcessor.removeBackground(type.imageSrc);
+                        type.processedImage = processed;
+                        console.log(`Processed ${type.name}`);
+                    } catch (e) {
+                        console.error(`Failed to process ${type.name}:`, e);
+                    }
+                }
+            });
+
+            // Also process player ship
+            try {
+                const playerImg = await SpriteProcessor.removeBackground('assets/sprites/player/ship_idle_01.png');
+                Player.processedImage = playerImg;
+                console.log("Processed Player Ship sprite");
+            } catch (e) {
+                console.error("Failed to process player ship:", e);
+            }
+
+            await Promise.all(promises);
+            console.log("Assets preloaded successfully.");
+        } catch (error) {
+            console.error("Error in preloadAssets:", error);
+            throw error;
+        }
     }
 
     resizeCanvas() {
@@ -203,14 +228,26 @@ class GameStateManager {
 
         switch (newState) {
             case 'intro':
+                // Lazy initialization
+                if (!this.introScreen) {
+                    this.introScreen = new IntroScreen(this.ctx, this.canvas, this.audioManager);
+                }
                 this.skipButton.style.display = 'block';
                 this.introScreen.start();
                 break;
             case 'fiber_dive':
+                // Lazy initialization
+                if (!this.fiberDiveAnimation) {
+                    this.fiberDiveAnimation = new FiberDiveAnimation(this.ctx, this.canvas, this.audioManager);
+                }
                 this.skipButton.style.display = 'block';
                 this.fiberDiveAnimation.start();
                 break;
             case 'countdown':
+                // Lazy initialization
+                if (!this.countdownScreen) {
+                    this.countdownScreen = new CountdownScreen(this.ctx, this.canvas, this.audioManager);
+                }
                 localStorage.setItem('hasSeenIntro', 'true');
                 this.hasSeenIntro = true;
                 this.countdownScreen.start();
@@ -219,10 +256,27 @@ class GameStateManager {
                 this.preGameScreen.start();
                 break;
             case 'gameplay':
+                // Lazy initialization for Gameplay
+                if (!this.gameplay) {
+                    this.gameplay = new Gameplay(
+                        this.ctx,
+                        this.canvas,
+                        this.audioManager,
+                        this,
+                        this.powerUpManager,
+                        this.progressionManager,
+                        this.hapticFeedback,
+                        this.particleSystem
+                    );
+                }
                 document.getElementById('ui-layer').style.display = 'flex';
                 this.gameplay.start();
                 break;
             case 'results':
+                // Lazy initialization for ResultsScreen
+                if (!this.resultsScreen) {
+                    this.resultsScreen = new ResultsScreen(this.ctx, this.canvas, this.progressionManager);
+                }
                 const accuracy = this.gameplay.shotsFired > 0
                     ? Math.round((this.gameplay.shotsHit / this.gameplay.shotsFired) * 100)
                     : 0;
@@ -776,6 +830,9 @@ class Gameplay {
         this.player = null;
         this.projectiles = [];
         this.enemyFormation = null;
+        this.boss = null; // Boss instance
+        this.bossSpawned = false;
+        this.bossSpawnTime = 30000; // Boss spawns at 30 seconds
         this.gameTime = 0;
         this.isGameOver = false;
 
@@ -807,10 +864,9 @@ class Gameplay {
             if (e.key === 'ArrowRight') this.input.right = false;
         });
 
-        // Touch/Mouse
+        // Touch/Mouse - only for movement, no manual shooting
         canvas.addEventListener('pointerdown', e => {
             if (!this.isGameOver) {
-                this.shoot();
                 this.input.x = e.clientX;
             }
         });
@@ -842,6 +898,8 @@ class Gameplay {
         this.isGameOver = false;
         this.victory = false;
         this.projectiles = [];
+        this.boss = null;
+        this.bossSpawned = false;
         this.gameTime = 0;
         this.sessionTimeRemaining = this.sessionDuration;
         this.sessionStartTime = performance.now();
@@ -906,6 +964,11 @@ class Gameplay {
         // Player
         if (this.player) {
             this.player.update(deltaTime, this.input);
+
+            // Auto-shooting
+            if (this.player.shouldAutoShoot()) {
+                this.shoot();
+            }
         }
 
         // Projectiles
@@ -922,22 +985,44 @@ class Gameplay {
             this.particleSystem.update(deltaTime);
         }
 
-        // Enemy Formation
-        if (this.enemyFormation) {
-            this.enemyFormation.update(deltaTime);
+        // Boss spawn logic - spawn at 30 seconds (15 seconds remaining)
+        if (!this.bossSpawned && this.gameTime >= this.bossSpawnTime) {
+            this.spawnBoss();
+        }
 
-            // Check if all enemies destroyed (WIN CONDITION)
-            if (this.enemyFormation.enemies.length === 0) {
+        // Update Boss
+        if (this.boss) {
+            this.boss.update(deltaTime);
+
+            // Boss shooting
+            const bossProjectiles = this.boss.shoot();
+            if (bossProjectiles && bossProjectiles.length > 0) {
+                this.projectiles.push(...bossProjectiles);
+            }
+
+            // Check if boss defeated (WIN CONDITION)
+            if (this.boss.markedForDeletion) {
                 this.victory = true;
-                // Calculate time bonus: +5 points per second remaining
-                const timeBonus = Math.floor(this.sessionTimeRemaining / 1000) * 5;
+                // Big bonus for defeating boss
+                const timeBonus = Math.floor(this.sessionTimeRemaining / 1000) * 10;
                 this.score += timeBonus;
                 this.gameOver();
                 return false;
             }
+        }
+
+        // Enemy Formation (only if boss hasn't spawned yet)
+        if (this.enemyFormation && !this.bossSpawned) {
+            this.enemyFormation.update(deltaTime);
+
+            // Check if all enemies destroyed - don't end game, wait for boss
+            if (this.enemyFormation.enemies.length === 0) {
+                // Clear enemy formation but don't end game
+                this.enemyFormation = null;
+            }
 
             // Enemy Shooting
-            if (Math.random() < 0.02) {
+            if (this.enemyFormation && Math.random() < 0.02) {
                 const enemyProjectile = this.enemyFormation.shoot();
                 if (enemyProjectile) {
                     this.projectiles.push(enemyProjectile);
@@ -951,6 +1036,28 @@ class Gameplay {
         return false;
     }
 
+    spawnBoss() {
+        console.log("Boss spawning!");
+        this.bossSpawned = true;
+
+        // Clear remaining enemies
+        if (this.enemyFormation) {
+            this.enemyFormation.enemies = [];
+            this.enemyFormation = null;
+        }
+
+        // Create boss
+        const gameRef = {
+            canvas: this.canvas,
+            width: this.canvas.width,
+            height: this.canvas.height
+        };
+        this.boss = new Boss(gameRef);
+
+        // Play boss music or sound effect
+        this.audioManager.playExplosion(); // Placeholder for boss entrance sound
+    }
+
     render() {
         // Clear screen
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -958,6 +1065,7 @@ class Gameplay {
         if (this.player) this.player.draw(this.ctx);
         this.projectiles.forEach(p => p.draw(this.ctx));
         if (this.enemyFormation) this.enemyFormation.draw(this.ctx);
+        if (this.boss) this.boss.draw(this.ctx); // Draw boss
 
         // Render particle effects
         if (this.particleSystem) {
@@ -990,6 +1098,7 @@ class Gameplay {
         this.projectiles.forEach(projectile => {
             if (projectile.isEnemy) return;
 
+            // Check collision with regular enemies
             if (this.enemyFormation) {
                 this.enemyFormation.enemies.forEach(enemy => {
                     if (!enemy.markedForDeletion && !projectile.markedForDeletion &&
@@ -1017,6 +1126,36 @@ class Gameplay {
                         }
                     }
                 });
+            }
+
+            // Check collision with Boss
+            if (this.boss && !this.boss.markedForDeletion && !projectile.markedForDeletion) {
+                const bossHitbox = this.boss.getHitbox ? this.boss.getHitbox() :
+                    { x: this.boss.x, y: this.boss.y, width: this.boss.width, height: this.boss.height };
+
+                if (this.rectIntersect(projectile.x, projectile.y, projectile.width, projectile.height,
+                    bossHitbox.x, bossHitbox.y, bossHitbox.width, bossHitbox.height)) {
+
+                    projectile.markedForDeletion = true;
+                    this.boss.takeDamage(1);
+                    this.score += 10; // Points per hit
+                    this.shotsHit++;
+                    document.getElementById('score').innerText = this.score;
+                    this.audioManager.playExplosion();
+
+                    // Haptic feedback and particle effect
+                    if (this.hapticFeedback) {
+                        this.hapticFeedback.hit();
+                    }
+                    if (this.particleSystem) {
+                        this.particleSystem.createExplosion(
+                            this.boss.x + this.boss.width / 2,
+                            this.boss.y + this.boss.height / 2,
+                            '#8B00FF',
+                            20
+                        );
+                    }
+                }
             }
         });
 
@@ -1161,7 +1300,12 @@ class ResultsScreen {
 // INITIALIZE GAME
 // ============================================
 
+console.log("Setting up window load listener...");
+
 window.addEventListener('load', () => {
+    console.log("Window loaded, initializing game...");
     const canvas = document.getElementById('gameCanvas');
+    console.log("Canvas element:", canvas);
     const game = new GameStateManager(canvas);
+    console.log("GameStateManager created:", game);
 });
