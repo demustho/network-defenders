@@ -205,7 +205,8 @@ button:active {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 15;
+    z-index: 25;
+    /* Above game over screen */
     pointer-events: none;
     animation: victoryFadeIn 0.5s ease-out;
 }
@@ -224,6 +225,7 @@ button:active {
     from {
         opacity: 0;
     }
+
     to {
         opacity: 1;
     }
@@ -234,9 +236,11 @@ button:active {
         transform: scale(0.5);
         opacity: 0;
     }
+
     50% {
         transform: scale(1.2);
     }
+
     100% {
         transform: scale(1);
         opacity: 1;

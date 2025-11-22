@@ -499,6 +499,8 @@ class IntroScreen {
 
         let yPos = 180;
         const lineHeight = 30;
+        const horizontalPadding = 40; // Padding from screen edges
+        const maxWidth = this.canvas.width - (horizontalPadding * 2); // Maximum text width
 
         for (let i = 0; i <= this.currentLine && i < this.lines.length; i++) {
             const line = this.lines[i];
@@ -527,13 +529,14 @@ class IntroScreen {
                 this.ctx.shadowBlur = 0;
             }
 
-            this.ctx.fillText(textToShow, this.canvas.width / 2, yPos);
+            // Draw text with max width constraint for padding
+            this.ctx.fillText(textToShow, this.canvas.width / 2, yPos, maxWidth);
 
             // Add pulse effect to current line
             if (i === this.currentLine && this.currentChar === line.length) {
                 const pulse = Math.sin(Date.now() * 0.005) * 0.3 + 0.7;
                 this.ctx.globalAlpha = pulse;
-                this.ctx.fillText(textToShow, this.canvas.width / 2, yPos);
+                this.ctx.fillText(textToShow, this.canvas.width / 2, yPos, maxWidth);
                 this.ctx.globalAlpha = 1.0;
             }
 
