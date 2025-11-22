@@ -1016,16 +1016,20 @@ class Gameplay {
 
             // Check if boss defeated (WIN CONDITION)
             if (this.boss.markedForDeletion) {
+                // Store boss position before it's removed
+                const bossX = this.boss.x + this.boss.width / 2;
+                const bossY = this.boss.y + this.boss.height / 2;
+
                 // Trigger epic boss explosion
                 if (this.particleSystem) {
-                    this.particleSystem.createBossExplosion(
-                        this.boss.x + this.boss.width / 2,
-                        this.boss.y + this.boss.height / 2
-                    );
+                    this.particleSystem.createBossExplosion(bossX, bossY);
                 }
 
                 // Play boss explosion sound
                 this.audioManager.playBossExplosion();
+
+                // Hide the boss but keep it in memory for a moment
+                this.boss.alive = false;
 
                 // Show victory message after explosion delay
                 const victoryMessages = [
@@ -1051,6 +1055,11 @@ class Gameplay {
                 // Big bonus for defeating boss
                 const timeBonus = Math.floor(this.sessionTimeRemaining / 1000) * 10;
                 this.score += timeBonus;
+
+                // Remove boss reference after explosion
+                setTimeout(() => {
+                    this.boss = null;
+                }, 2000); // Keep particles visible
 
                 // Delay game over to show explosion
                 setTimeout(() => {
