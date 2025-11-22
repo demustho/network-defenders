@@ -18,10 +18,10 @@ export class Particle {
         this.x += this.vx * (deltaTime / 1000);
         this.y += this.vy * (deltaTime / 1000);
         this.age += deltaTime;
-        
+
         // Fade out over lifetime
         this.alpha = 1.0 - (this.age / this.lifetime);
-        
+
         return this.age < this.lifetime;
     }
 
@@ -82,7 +82,7 @@ export class ParticleSystem {
                 y: Math.sin(angle) * speed
             };
             const lifetime = 300 + Math.random() * 200;
-            
+
             this.particles.push(new Particle(x, y, color, velocity, lifetime));
         }
     }
@@ -98,7 +98,7 @@ export class ParticleSystem {
                 y: Math.sin(angle) * speed
             };
             const lifetime = 500 + Math.random() * 300;
-            
+
             this.particles.push(new Particle(x, y, color, velocity, lifetime));
         }
     }
@@ -112,7 +112,54 @@ export class ParticleSystem {
                 y: Math.random() * 30 + 10
             };
             const lifetime = 200 + Math.random() * 100;
-            
+
+            this.particles.push(new Particle(x, y, color, velocity, lifetime));
+        }
+    }
+
+    createBossExplosion(x, y) {
+        if (!this.enabled) return;
+
+        // Stage 1: Flash particles (bright, fast, short-lived)
+        for (let i = 0; i < 20; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = 200 + Math.random() * 100;
+            const velocity = {
+                x: Math.cos(angle) * speed,
+                y: Math.sin(angle) * speed
+            };
+            const lifetime = 100 + Math.random() * 100;
+
+            this.particles.push(new Particle(x, y, '#FFFFFF', velocity, lifetime));
+        }
+
+        // Stage 2: Shockwave ring particles
+        for (let i = 0; i < 40; i++) {
+            const angle = (Math.PI * 2 * i) / 40;
+            const speed = 150 + Math.random() * 50;
+            const velocity = {
+                x: Math.cos(angle) * speed,
+                y: Math.sin(angle) * speed
+            };
+            const lifetime = 400 + Math.random() * 200;
+            const colors = ['#FF0000', '#FF6600', '#FFAA00', '#FFFF00'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+
+            this.particles.push(new Particle(x, y, color, velocity, lifetime));
+        }
+
+        // Stage 3: Debris particles (slower, varied directions, longer-lived)
+        for (let i = 0; i < 60; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = 50 + Math.random() * 150;
+            const velocity = {
+                x: Math.cos(angle) * speed,
+                y: Math.sin(angle) * speed
+            };
+            const lifetime = 600 + Math.random() * 400;
+            const colors = ['#8B00FF', '#FF00FF', '#00FFFF', '#E30613'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+
             this.particles.push(new Particle(x, y, color, velocity, lifetime));
         }
     }

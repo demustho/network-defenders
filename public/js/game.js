@@ -184,7 +184,7 @@ class GameStateManager {
         this.ctx.imageSmoothingEnabled = false;
 
         if (this.gameplay && this.gameplay.player) {
-            this.gameplay.player.y = this.canvas.height - this.gameplay.player.height - 20;
+            this.gameplay.player.y = this.canvas.height - this.gameplay.player.height - 150;
         }
     }
 
@@ -398,6 +398,9 @@ class IntroScreen {
         this.holdStartTime = null;
         this.done = false;
         this.startTime = performance.now();
+
+        // Play intro music
+        this.audioManager.playIntroMusic();
     }
 
     skip() {
@@ -583,7 +586,9 @@ class FiberDiveAnimation {
     start() {
         this.elapsed = 0;
         this.done = false;
-        // this.audioManager.playWhoosh();
+
+        // Play warp sound effect
+        this.audioManager.playWarpSound();
     }
 
     skip() {
@@ -753,8 +758,14 @@ class CountdownScreen {
             this.elapsed = 0;
             this.count--;
 
-            // Play beep sound
-            // this.audioManager.playBeep(3 - this.count);
+            // Play beep sound with different pitch for each number
+            if (this.count === 2) {
+                this.audioManager.playSciFiBeep(1.0);
+            } else if (this.count === 1) {
+                this.audioManager.playSciFiBeep(1.2);
+            } else if (this.count === 0) {
+                this.audioManager.playSciFiBeep(1.5);
+            }
 
             if (this.count < 0) {
                 this.done = true;
@@ -1002,11 +1013,47 @@ class Gameplay {
 
             // Check if boss defeated (WIN CONDITION)
             if (this.boss.markedForDeletion) {
+                // Trigger epic boss explosion
+                if (this.particleSystem) {
+                    this.particleSystem.createBossExplosion(
+                        this.boss.x + this.boss.width / 2,
+                        this.boss.y + this.boss.height / 2
+                    );
+                }
+
+                // Play boss explosion sound
+                this.audioManager.playBossExplosion();
+
+                // Show victory message after explosion delay
+                const victoryMessages = [
+                    "You defeated the Slow Internet!",
+                    "Lag Destroyed. Speed Restored.",
+                    "Connection Secured!",
+                    "Network Defended!",
+                    "Bandwidth Protected!",
+                    "Glitch Eliminated!"
+                ];
+                const randomMessage = victoryMessages[Math.floor(Math.random() * victoryMessages.length)];
+
+                setTimeout(() => {
+                    const victoryOverlay = document.getElementById('victory-message');
+                    const victoryText = document.getElementById('victory-text');
+                    if (victoryOverlay && victoryText) {
+                        victoryText.innerText = randomMessage;
+                        victoryOverlay.classList.remove('hidden');
+                    }
+                }, 1500); // Show after 1.5 seconds
+
                 this.victory = true;
                 // Big bonus for defeating boss
                 const timeBonus = Math.floor(this.sessionTimeRemaining / 1000) * 10;
                 this.score += timeBonus;
-                this.gameOver();
+
+                // Delay game over to show explosion
+                setTimeout(() => {
+                    this.gameOver();
+                }, 3000); // 3 seconds total (1.5s explosion + 1.5s message)
+
                 return false;
             }
         }

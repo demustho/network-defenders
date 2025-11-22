@@ -4,7 +4,7 @@ export class Player {
         this.width = 64; // 64x64 sprite
         this.height = 64;
         this.x = canvas.width / 2 - this.width / 2;
-        this.y = canvas.height - this.height - 20;
+        this.y = canvas.height - this.height - 150; // Increased padding for mobile thumb clearance
         this.speed = 300; // pixels per second
         this.color = '#E30613'; // Ooredoo Red
 
